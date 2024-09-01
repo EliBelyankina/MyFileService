@@ -1,0 +1,31 @@
+version: '3'
+services:
+  image_service:
+    build: .
+    hostname: image_service
+    container_name: image_service
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    environment:
+      - SECRET_KEY
+      - ALGORITHM
+      - DB_HOST
+      - DB_NAME
+      - DB_USER
+      - DB_PASSWORD
+    healthcheck:
+      test: curl --fail -s http://image_service:8000/healthcheck || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://${LGM_GRAYLOG_HOST}:${LGM_GRAYLOG_PORT}"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 4G
+
